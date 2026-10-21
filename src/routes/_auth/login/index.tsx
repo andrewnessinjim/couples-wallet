@@ -19,17 +19,11 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-// 1. URL search params: /login?code=12345 (from the invitation flow)
-const loginSearchSchema = z.object({
-  code: z.string().optional(),
-});
-
 export const Route = createFileRoute("/_auth/login/")({
-  validateSearch: loginSearchSchema,
   component: LoginPage,
 });
 
-// 2. What valid form data looks like
+// 1. What valid form data looks like
 const loginSchema = z.object({
   email: z.email("Enter a valid email address"),
   password: z.string().min(1, "Password is required"),
@@ -38,18 +32,16 @@ const loginSchema = z.object({
 type LoginValues = z.infer<typeof loginSchema>;
 
 function LoginPage() {
-  const { code } = Route.useSearch();
-
-  // 3. The form, validated by the zod schema
+  // 2. The form, validated by the zod schema
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
-  // 4. Only runs when validation passes
+  // 3. Only runs when validation passes
   function onSubmit(values: LoginValues) {
     // TODO: call the auth provider once we pick a backend
-    console.log({ ...values, code });
+    console.log(values);
   }
 
   return (
@@ -57,9 +49,7 @@ function LoginPage() {
       <CardHeader>
         <CardTitle>Log in</CardTitle>
         <CardDescription>
-          {code
-            ? "Log in to join your partner's wallet."
-            : "Welcome back. Log in to your shared wallet."}
+          Welcome back. Log in to your shared wallet.
         </CardDescription>
       </CardHeader>
 
@@ -70,22 +60,25 @@ function LoginPage() {
               name="email"
               control={form.control}
               render={({ field, fieldState }) => {
-                console.log({field, fieldState});
+                console.log({ field, fieldState });
                 return (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input
-                    {...field}
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}}
+                  <Field data-invalid={fieldState.invalid}>
+                    <div className="flex gap-4 items-baseline">
+                      <FieldLabel htmlFor="email">Email</FieldLabel>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </div>
+                    <Input
+                      {...field}
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      aria-invalid={fieldState.invalid}
+                    />
+                  </Field>
+                );
+              }}
             />
 
             <Controller
@@ -93,7 +86,12 @@ function LoginPage() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <div className="flex gap-4 items-baseline">
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </div>
                   <Input
                     {...field}
                     id="password"
@@ -101,9 +99,6 @@ function LoginPage() {
                     autoComplete="current-password"
                     aria-invalid={fieldState.invalid}
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
                 </Field>
               )}
             />
