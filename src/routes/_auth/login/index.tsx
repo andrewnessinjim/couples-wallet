@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -60,15 +60,10 @@ function LoginPage() {
               name="email"
               control={form.control}
               render={({ field, fieldState }) => {
-                console.log({ field, fieldState });
                 return (
                   <Field data-invalid={fieldState.invalid}>
-                    <div className="flex gap-4 items-baseline">
-                      <FieldLabel htmlFor="email">Email</FieldLabel>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </div>
+                    <FieldLabel htmlFor="email">Email</FieldLabel>
+
                     <Input
                       {...field}
                       id="email"
@@ -76,6 +71,9 @@ function LoginPage() {
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
                     />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 );
               }}
@@ -86,12 +84,8 @@ function LoginPage() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <div className="flex gap-4 items-baseline">
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </div>
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+
                   <Input
                     {...field}
                     id="password"
@@ -99,13 +93,16 @@ function LoginPage() {
                     autoComplete="current-password"
                     aria-invalid={fieldState.invalid}
                   />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />
           </FieldGroup>
         </CardContent>
 
-        <CardFooter className="mt-6">
+        <CardFooter className="mt-6 flex-col items-start gap-4">
           <Button
             type="submit"
             className="w-full"
@@ -113,6 +110,12 @@ function LoginPage() {
           >
             Log in
           </Button>
+          <p className="text-sm">
+            Don't have an account?{" "}
+            <Link to="/register" className="underline underline-offset-4">
+              Create one
+            </Link>
+          </p>
         </CardFooter>
       </form>
     </Card>

@@ -8,6 +8,16 @@ This is an **educational project**. It will be open-sourced, deployed, and built
 
 The current priority is to **ship a working version fast**: build it, open-source it, deploy it, and launch the channel. Polish and redesigns can come later.
 
+### Payments & hosting
+- Payments are part of the initial release, kept as simple as possible: hosted checkout, one webhook, and the provider's customer portal.
+- The goal is to **break even, not to make a profit**: be able to say "10 paying users" on a resume without losing money if the app is left running long term.
+- Planned price: **$4.99/year per couple**, through a merchant of record (Paddle / Lemon Squeezy) so they handle sales tax and VAT.
+- Keep running costs near zero: stay on free tiers and avoid anything with a fixed monthly fee. The only expected fixed cost is the domain.
+- **Backend: Supabase** (free plan). It pauses projects after ~1 week of low database activity, so plan for that:
+  - At deployment, set up a **keep-alive ping**: an external free cron service (e.g. cron-job.org) makes a small API request to the project every 3–4 days. Prefer this over GitHub Actions, which disables scheduled workflows after ~60 days without commits.
+  - Supabase's terms and docs (checked 2026-10-22) neither allow nor forbid keep-alive pings. The pausing docs list API calls as a way to generate activity, but say "user database activity" counts, so pings may stop working. Re-check before relying on it.
+  - Fallback: a paused free project can be restored from the dashboard (the docs say up to 1 year after pausing).
+
 ### Rules for Claude
 - **Push back** when work drifts from this goal. Examples: perfecting UI details, premature optimization, rewriting things that already work, adding features outside the flow below, or tooling rabbit holes. Say so plainly and suggest the faster path, then let the user decide.
 - Prefer popular, well-documented, mainstream tools and patterns that students can follow and that are good for YouTube.
