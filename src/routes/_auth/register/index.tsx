@@ -7,17 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { FieldGroup } from "@/components/ui/field";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import z from "zod";
+import { FormInput } from "../-components/FormInput";
 
 export const Route = createFileRoute("/_auth/register/")({
   component: RegisterPage,
@@ -55,64 +51,26 @@ function RegisterPage() {
       <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
         <CardContent>
           <FieldGroup>
-            <Controller
+            <FormInput
               name="email"
+              type="email"
+              label="Email"
+              autoComplete="email"
               control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input
-                    {...field}
-                    type="email"
-                    id="email"
-                    autoComplete="email"
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
             />
-            <Controller
+            <FormInput
               name="password"
+              type="password"
+              label="Password"
+              autoComplete="new-password"
               control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Input
-                    {...field}
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
             />
-            <Controller
-              control={form.control}
+            <FormInput
               name="repeatPassword"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="repeatPassword">
-                    Repeat Password
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    type="password"
-                    id="repeatPassword"
-                    autoComplete="new-password"
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
+              type="password"
+              label="Repeat Password"
+              autoComplete="new-password"
+              control={form.control}
             />
           </FieldGroup>
         </CardContent>
