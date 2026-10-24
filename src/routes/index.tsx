@@ -1,10 +1,32 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { buttonVariants } from "@/components/ui/button";
+import { Container } from "@/components/Container";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
+
+function LandingHeader() {
+  return (
+    <header>
+      <Container className="flex h-16  items-center justify-between border-b">
+        <Link to="/" className="text-lg font-semibold">
+          💰 Couples Wallet
+        </Link>
+        <nav className="flex items-center gap-2">
+          <Link to="/login" className={buttonVariants({ variant: "ghost" })}>
+            Log in
+          </Link>
+          <Link to="/register" className={buttonVariants()}>
+            Register
+          </Link>
+        </nav>
+      </Container>
+    </header>
+  );
+}
 
 function LandingPage() {
   const [status, setStatus] = useState("Checking Supabase connection...");
@@ -22,9 +44,14 @@ function LandingPage() {
   }, []);
 
   return (
-    <main className="p-8">
-      <h1>Landing</h1>
-      <p>{status}</p>
-    </main>
+    <>
+      <LandingHeader />
+      <main className="py-8">
+        <Container>
+          <h1>Landing</h1>
+          <p>{status}</p>
+        </Container>
+      </main>
+    </>
   );
 }
