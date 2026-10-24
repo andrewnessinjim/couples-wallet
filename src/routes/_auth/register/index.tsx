@@ -12,7 +12,7 @@ import { FieldGroup } from "@/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
-import z from "zod";
+import { z } from "zod";
 import { FormInput } from "../-components/FormInput";
 
 export const Route = createFileRoute("/_auth/register/")({
@@ -75,7 +75,11 @@ function RegisterPage() {
           </FieldGroup>
         </CardContent>
         <CardFooter className="mt-6 flex-col items-start gap-4">
-          <Button className="w-full" type="submit">
+          <Button
+            className="w-full"
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
             Create Account
           </Button>
           <p className="text-sm">
