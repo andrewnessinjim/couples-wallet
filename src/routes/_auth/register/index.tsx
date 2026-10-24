@@ -81,7 +81,7 @@ function RegisterPage() {
           <p className="text-sm">
             Already have an account?{" "}
             <Link to="/login" className="underline underline-offset-4">
-              Login
+              Log in
             </Link>
           </p>
         </CardFooter>
