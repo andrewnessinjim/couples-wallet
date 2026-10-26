@@ -5,10 +5,15 @@ import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/Container";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getSession();
+    return { session: data.session };
+  },
   component: LandingPage,
 });
 
 function LandingHeader() {
+  const { session } = Route.useRouteContext();
   return (
     <header>
       <Container className="flex h-16  items-center justify-between border-b">
@@ -16,15 +21,33 @@ function LandingHeader() {
           💰 Couples Wallet
         </Link>
         <nav className="flex items-center gap-2">
-          <Link to="/login" className={buttonVariants({ variant: "ghost" })}>
-            Log in
-          </Link>
-          <Link to="/register" className={buttonVariants()}>
-            Register
-          </Link>
+          {session ? <UserLinks /> : <VisitorLinks />}
         </nav>
       </Container>
     </header>
+  );
+}
+
+function UserLinks() {
+  return (
+    <>
+      <Link to="/dashboard" className={buttonVariants()}>
+        Dashboard
+      </Link>
+    </>
+  );
+}
+
+function VisitorLinks() {
+  return (
+    <>
+      <Link to="/login" className={buttonVariants({ variant: "ghost" })}>
+        Log in
+      </Link>
+      <Link to="/register" className={buttonVariants()}>
+        Register
+      </Link>
+    </>
   );
 }
 

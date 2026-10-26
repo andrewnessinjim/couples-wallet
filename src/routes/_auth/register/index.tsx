@@ -7,13 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FieldGroup } from "@/components/ui/field";
+import { FieldError, FieldGroup } from "@/components/ui/field";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { FormInput } from "../-components/FormInput";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/_auth/register/")({
   component: RegisterPage,
@@ -33,14 +34,23 @@ const registerSchema = z
 type RegisterValues = z.infer<typeof registerSchema>;
 
 function RegisterPage() {
+  const navigate = useNavigate();
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: { email: "", password: "", repeatPassword: "" },
   });
 
-  function onSubmit(registerValues: RegisterValues) {
-    console.log(registerValues);
+  async function onSubmit({ email, password }: RegisterValues) {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      form.setError("root", { message: error.message });
+      return;
+    }
+
+    navigate({ to: "/dashboard" });
   }
+
+  const formRootError = form.formState.errors.root;
 
   return (
     <Card>
@@ -75,6 +85,7 @@ function RegisterPage() {
           </FieldGroup>
         </CardContent>
         <CardFooter className="mt-6 flex-col items-start gap-4">
+          {formRootError && <FieldError errors={[formRootError]} />}
           <Button
             className="w-full"
             type="submit"

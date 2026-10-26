@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FieldGroup } from "@/components/ui/field";
+import { FieldError, FieldGroup } from "@/components/ui/field";
 import { FormInput } from "../-components/FormInput";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/_auth/login/")({
   component: LoginPage,
@@ -32,13 +33,24 @@ function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
+  const navigate = useNavigate();
 
   // 3. Only runs when validation passes
-  function onSubmit(values: LoginValues) {
-    // TODO: call the auth provider once we pick a backend
-    console.log(values);
+  async function onSubmit({ email, password }: LoginValues) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      form.setError("root", { message: error.message });
+      return;
+    }
+
+    navigate({ to: "/dashboard" });
   }
 
+  const formRootError = form.formState.errors.root;
   return (
     <Card>
       <CardHeader>
@@ -69,6 +81,7 @@ function LoginPage() {
         </CardContent>
 
         <CardFooter className="mt-6 flex-col items-start gap-4">
+          {formRootError && <FieldError errors={[formRootError]} />}
           <Button
             type="submit"
             className="w-full"
