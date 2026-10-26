@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/Container";
+import { Header } from "@/components/Header";
 
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {
@@ -15,16 +16,7 @@ export const Route = createFileRoute("/")({
 function LandingHeader() {
   const { session } = Route.useRouteContext();
   return (
-    <header>
-      <Container className="flex h-16  items-center justify-between border-b">
-        <Link to="/" className="text-lg font-semibold">
-          💰 Couples Wallet
-        </Link>
-        <nav className="flex items-center gap-2">
-          {session ? <UserLinks /> : <VisitorLinks />}
-        </nav>
-      </Container>
-    </header>
+    <Header>{session ? <UserLinks /> : <VisitorLinks />}</Header>
   );
 }
 
