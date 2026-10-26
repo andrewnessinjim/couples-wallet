@@ -8,6 +8,17 @@ This is an **educational project**. It will be open-sourced, deployed, and built
 
 The current priority is to **ship a working version fast**: build it, open-source it, deploy it, and launch the channel. Polish and redesigns can come later.
 
+### v1 scope (launch)
+The app is not launchable without all of these:
+- **Auth**: register, login, logout.
+- **Onboarding**: create a wallet and invite a partner by email.
+- **Invitations**: the partner joins through the invitation flow below.
+- **Transactions**: add expenses and income, and view them.
+- **Summary**: one summary view on the dashboard.
+- **Payments**: hosted checkout, one webhook, and the customer portal (see below).
+
+Everything else in the routes below comes after launch: budgets, recurring transactions, charts, in-place editing, and filters and pagination on All Transactions. Push back on building any of it before v1 ships.
+
 ### Payments & hosting
 - Payments are part of the initial release, kept as simple as possible: hosted checkout, one webhook, and the provider's customer portal.
 - The goal is to **break even, not to make a profit**: be able to say "10 paying users" on a resume without losing money if the app is left running long term.
