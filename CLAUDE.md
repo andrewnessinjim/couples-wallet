@@ -44,11 +44,17 @@ Follow these routes and redirect rules when building pages and routing. Check he
 - `/login`: skipped if already logged in. After login, check whether the wallet has a partner:
   - Partner present → `/dashboard/[wallet-id]`
   - No partner → `/onboarding`
-- `/register` → `/onboarding`
-- `/onboarding`: enter wallet name and partner's email → `/dashboard/[wallet-id]`
+- `/register` → `/onboarding`. Register asks only for email and password, to keep sign-up friction low.
+- `/onboarding`: enter wallet name, your name, partner's name and partner's email → `/dashboard/[wallet-id]`
+
+### User names
+- Names live in a `public.profiles` table (one row per user, `id` → `auth.users`), so partners can see each other's names. RLS: you can read your own profile and your partner's.
+- A trigger on `auth.users` creates the profile at sign-up with an empty name (`name` is nullable).
+- The owner's name is set in onboarding. The partner's name is the one the owner typed in onboarding: it's stored on the invitation and copied to the partner's profile when they accept, so the partner never fills in a name form.
+- Editing your own name in Settings comes after launch.
 
 ### Invitation flow (partner joining)
-- `/invitation?code=12345`: invitation page. The partner can request the invitation be sent to a different email.
+- `/invitation?code=12345`: invitation page, greeting the partner by the name the owner entered ("Andrea invited you, Abel"). The partner can request the invitation be sent to a different email.
 - Invalid code → `/invalid-code` (message + links to homepage, login and register)
 - Valid code → does an account exist?
   - Yes → `/login?code=12345` (skipped if already logged in) → `/dashboard/[wallet-id]`

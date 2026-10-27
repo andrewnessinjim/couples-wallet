@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppDashboardIndexRouteImport } from './routes/_app/dashboard/index'
+import { Route as AppDashboardWalletIdRouteImport } from './routes/_app/dashboard/$walletId'
 import { Route as AppOnboardingIndexRouteImport } from './routes/_app/onboarding/index'
 import { Route as AuthLoginIndexRouteImport } from './routes/_auth/login/index'
 import { Route as AuthRegisterIndexRouteImport } from './routes/_auth/register/index'
@@ -35,6 +36,11 @@ const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDashboardWalletIdRoute = AppDashboardWalletIdRouteImport.update({
+  id: '/dashboard/$walletId',
+  path: '/dashboard/$walletId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOnboardingIndexRoute = AppOnboardingIndexRouteImport.update({
   id: '/onboarding/',
   path: '/onboarding/',
@@ -53,6 +59,7 @@ const AuthRegisterIndexRoute = AuthRegisterIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard/$walletId': typeof AppDashboardWalletIdRoute
   '/dashboard/': typeof AppDashboardIndexRoute
   '/onboarding/': typeof AppOnboardingIndexRoute
   '/login/': typeof AuthLoginIndexRoute
@@ -60,6 +67,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard/$walletId': typeof AppDashboardWalletIdRoute
   '/dashboard': typeof AppDashboardIndexRoute
   '/onboarding': typeof AppOnboardingIndexRoute
   '/login': typeof AuthLoginIndexRoute
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
+  '/_app/dashboard/$walletId': typeof AppDashboardWalletIdRoute
   '/_app/dashboard/': typeof AppDashboardIndexRoute
   '/_app/onboarding/': typeof AppOnboardingIndexRoute
   '/_auth/login/': typeof AuthLoginIndexRoute
@@ -77,14 +86,27 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard/' | '/onboarding/' | '/login/' | '/register/'
+  fullPaths:
+    | '/'
+    | '/dashboard/$walletId'
+    | '/dashboard/'
+    | '/onboarding/'
+    | '/login/'
+    | '/register/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/onboarding' | '/login' | '/register'
+  to:
+    | '/'
+    | '/dashboard/$walletId'
+    | '/dashboard'
+    | '/onboarding'
+    | '/login'
+    | '/register'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_auth'
+    | '/_app/dashboard/$walletId'
     | '/_app/dashboard/'
     | '/_app/onboarding/'
     | '/_auth/login/'
@@ -127,6 +149,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/dashboard/$walletId': {
+      id: '/_app/dashboard/$walletId'
+      path: '/dashboard/$walletId'
+      fullPath: '/dashboard/$walletId'
+      preLoaderRoute: typeof AppDashboardWalletIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/onboarding/': {
       id: '/_app/onboarding/'
       path: '/onboarding'
@@ -152,11 +181,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppDashboardWalletIdRoute: typeof AppDashboardWalletIdRoute
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
   AppOnboardingIndexRoute: typeof AppOnboardingIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppDashboardWalletIdRoute: AppDashboardWalletIdRoute,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
   AppOnboardingIndexRoute: AppOnboardingIndexRoute,
 }

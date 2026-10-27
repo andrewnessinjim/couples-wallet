@@ -1,3 +1,4 @@
+import { Container } from "@/components/Container";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
@@ -5,7 +6,7 @@ import { Outlet, useNavigate } from "@tanstack/react-router";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app")({
-  component: RouteComponent,
+  component: AppLayout,
   async beforeLoad() {
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
@@ -14,12 +15,16 @@ export const Route = createFileRoute("/_app")({
   },
 });
 
-function RouteComponent() {
+function AppLayout() {
   return (
-    <main>
+    <>
       <AppHeader />
-      <Outlet />
-    </main>
+      <main className="py-8">
+        <Container>
+          <Outlet />
+        </Container>
+      </main>
+    </>
   );
 }
 

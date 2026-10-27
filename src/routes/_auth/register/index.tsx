@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { FormInput } from "../-components/FormInput";
+import { FormInput } from "../../../components/FormInput";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/_auth/register/")({

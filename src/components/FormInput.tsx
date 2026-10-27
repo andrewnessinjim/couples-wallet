@@ -25,7 +25,7 @@ export function FormInput<T extends FieldValues>({
       control={control}
       name={name}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
+        <Field data-invalid={fieldState.invalid} className="gap-1.5">
           <FieldLabel htmlFor={name}>{label}</FieldLabel>
           <Input
             {...delegated}

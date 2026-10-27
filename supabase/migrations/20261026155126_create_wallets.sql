@@ -1,7 +1,7 @@
 create table public.wallets (
     id uuid primary key default gen_random_uuid(),
     name text not null,
-    owner_id uuid not null references auth.users(id) on delete cascade,
+    owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
     partner_id uuid references auth.users(id) on delete set null,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()

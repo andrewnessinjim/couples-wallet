@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FieldError, FieldGroup } from "@/components/ui/field";
-import { FormInput } from "../-components/FormInput";
+import { FormInput } from "../../../components/FormInput";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/_auth/login/")({
