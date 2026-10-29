@@ -2,7 +2,6 @@ import { supabase } from "@/lib/supabase";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app/dashboard/")({
-  component: RouteComponent,
   async beforeLoad() {
     const { error, data } = await supabase.from("wallets").select("id");
 
@@ -20,7 +19,3 @@ export const Route = createFileRoute("/_app/dashboard/")({
     });
   },
 });
-
-function RouteComponent() {
-  return <div>Hello "/dashboard/"!</div>;
-}
