@@ -23,7 +23,21 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "wallets": {
+            "profiles": {
+                  Row: {
+                    "id": string,"name": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id": string,"name"?: string | null
+                  }
+                  Update: {
+                    "id"?: string,"name"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"wallets": {
                   Row: {
                     "created_at": string,"id": string,"name": string,"owner_id": string,"partner_id": string | null,"updated_at": string
                   }
@@ -43,7 +57,9 @@ export type Database = {
             [_ in never]: never
           }
           Functions: {
-            [_ in never]: never
+            "create_wallet":
+{ Args: { "p_owner_name": string,"p_wallet_name": string }; Returns: string
+                           }
           }
           Enums: {
             [_ in never]: never

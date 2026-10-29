@@ -11,10 +11,21 @@ export const Route = createFileRoute("/_app/onboarding/")({
   component: OnboardingPage,
 });
 
+const WALLET_MAX_LENGTH = 50;
+const NAME_MAX_LENGTH = 50;
+
 const onboardingSchema = z.object({
-  walletName: z.string().min(4, "At least 4 characters."),
-  name: z.string().min(1, "Name is required."),
-  partnerName: z.string().min(1, "Partner name is required."),
+  walletName: z
+    .string()
+    .trim()
+    .min(1, "Wallet name is required.")
+    .max(WALLET_MAX_LENGTH, `Must be at most ${WALLET_MAX_LENGTH} characters.`),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required.")
+    .max(NAME_MAX_LENGTH, `Must be at most ${NAME_MAX_LENGTH} characters.`),
+  partnerName: z.string().trim().min(1, "Partner name is required."),
   partnerEmail: z.email("Enter a valid email address."),
 });
 
@@ -32,12 +43,11 @@ function OnboardingPage() {
   });
   const navigate = useNavigate();
 
-  async function onSubmit({ walletName }: OnboardingValues) {
-    const { data, error } = await supabase
-      .from("wallets")
-      .insert({ name: walletName })
-      .select("id")
-      .single();
+  async function onSubmit({ walletName, name }: OnboardingValues) {
+    const { data: walletId, error } = await supabase.rpc("create_wallet", {
+      p_owner_name: name,
+      p_wallet_name: walletName,
+    });
 
     if (error) {
       console.error(error);
@@ -50,7 +60,7 @@ function OnboardingPage() {
     navigate({
       to: "/dashboard/$walletId",
       params: {
-        walletId: data.id,
+        walletId,
       },
     });
   }
@@ -69,12 +79,14 @@ function OnboardingPage() {
             name="walletName"
             label="Wallet Name"
             control={form.control}
+            maxLength={WALLET_MAX_LENGTH}
           />
           <FormInput
             type="text"
             name="name"
             label="Your Name"
             control={form.control}
+            maxLength={NAME_MAX_LENGTH}
           />
 
           <FormInput
