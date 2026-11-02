@@ -11,8 +11,8 @@ The current priority is to **ship a working version fast**: build it, open-sourc
 ### v1 scope (launch)
 The app is not launchable without all of these:
 - **Auth**: register, login, logout.
-- **Onboarding**: create a wallet and invite a partner by email.
-- **Invitations**: the partner joins through the invitation flow below.
+- **Onboarding**: create a wallet (wallet name and your name).
+- **Invitations**: from the dashboard, the owner invites the partner and gets a shareable link to send them (sending it by email comes after launch). The partner joins through the invitation flow below.
 - **Transactions**: add expenses and income, and view them.
 - **Summary**: one summary view on the dashboard.
 - **Payments**: hosted checkout, one webhook, and the customer portal (see below).
@@ -28,11 +28,13 @@ Everything else in the routes below comes after launch: budgets, recurring trans
   - At deployment, set up a **keep-alive ping**: an external free cron service (e.g. cron-job.org) makes a small API request to the project every 3–4 days. Prefer this over GitHub Actions, which disables scheduled workflows after ~60 days without commits.
   - Supabase's terms and docs (checked 2026-10-22) neither allow nor forbid keep-alive pings. The pausing docs list API calls as a way to generate activity, but say "user database activity" counts, so pings may stop working. Re-check before relying on it.
   - Fallback: a paused free project can be restored from the dashboard (the docs say up to 1 year after pausing).
+- **Email**: production needs our own SMTP provider on a free tier (e.g. Resend) for sign-up confirmation emails. Supabase's built-in email is only meant for testing (check the current limits). Confirmation is required because `accept_invitation` trusts the user's email.
 
 ### Rules for Claude
 - **Push back** when work drifts from this goal. Examples: perfecting UI details, premature optimization, rewriting things that already work, adding features outside the flow below, or tooling rabbit holes. Say so plainly and suggest the faster path, then let the user decide.
 - Prefer popular, well-documented, mainstream tools and patterns that students can follow and that are good for YouTube.
 - Keep code readable and teachable over clever.
+- **Migrations before launch:** nothing is deployed until v1 launches, so edit existing migrations in place to keep them organized (one migration per table or concept). Only suggest a new migration for a new concept. After launch, never edit a deployed migration.
 - **Don't make changes on your own.** By default, give the user step-by-step instructions to follow. Only edit files, install packages or run setup commands when the user explicitly asks you to.
 
 ## System flow & routes
@@ -41,27 +43,42 @@ Follow these routes and redirect rules when building pages and routing. Check he
 
 ### Entry / auth
 - `/`: Landing page. Links to `/register` and `/login`.
-- `/login`: skipped if already logged in. After login, check whether the wallet has a partner:
-  - Partner present → `/dashboard/[wallet-id]`
-  - No partner → `/onboarding`
-- `/register` → `/onboarding`. Register asks only for email and password, to keep sign-up friction low.
-- `/onboarding`: enter wallet name, your name, partner's name and partner's email → `/dashboard/[wallet-id]`
+- `/login`: skipped if already logged in. → `/dashboard`
+- `/register` → `/dashboard`. Register asks only for email and password, to keep sign-up friction low.
+- `/dashboard`: router only, no page. Does the user have a wallet (as owner or partner)?
+  - Yes → `/dashboard/[wallet-id]`
+  - No → `/onboarding`
+- `/onboarding`: enter wallet name and your name → `/dashboard/[wallet-id]`. Done by the `create_wallet` function.
+- With `?code=...` (coming from an invitation), login and register return to the invitation flow instead of going to `/dashboard`.
 
 ### User names
 - Names live in a `public.profiles` table (one row per user, `id` → `auth.users`), so partners can see each other's names. RLS: you can read your own profile and your partner's.
 - A trigger on `auth.users` creates the profile at sign-up with an empty name (`name` is nullable).
-- The owner's name is set in onboarding. The partner's name is the one the owner typed in onboarding: it's stored on the invitation and copied to the partner's profile when they accept, so the partner never fills in a name form.
+- The owner's name is set in onboarding. The partner's name is the one the owner typed in the invite form: it's stored on the invitation and copied to the partner's profile when they accept, so the partner never fills in a name form.
 - Editing your own name in Settings comes after launch.
 
-### Invitation flow (partner joining)
-- `/invitation?code=12345`: invitation page, greeting the partner by the name the owner entered ("Andrea invited you, Abel"). The partner can request the invitation be sent to a different email.
-- Invalid code → `/invalid-code` (message + links to homepage, login and register)
-- Valid code → does an account exist?
-  - Yes → `/login?code=12345` (skipped if already logged in) → `/dashboard/[wallet-id]`
-  - No → `/register?code=12345` → `/dashboard/[wallet-id]`
+### Invitation flow
+**Owner invites:**
+- On the dashboard, the "waiting for partner" banner has an **Invite Partner** action → `/dashboard/[wallet-id]/invite-partner`: partner's name and email.
+- Saves a row in `invitations` (`id` = the code, `wallet_id`, `partner_name`, `partner_email`). The code must be **unguessable** (a uuid, not a short number).
+- Shows the link `/invitation?code=<code>` with a **Copy link** button. The owner sends it to the partner themselves.
+
+**Partner joins:**
+- `/invitation?code=<code>` (works logged out): is the code valid?
+  - Invalid (no such invitation, already used, or the wallet already has a partner) → `/invalid-code` (message + links to homepage, login and register)
+  - Valid → invitation page greeting the partner by name ("Andrea invited you, Abel"), with an **Accept** button.
+- Accept → is the partner logged in?
+  - No → `/login?code=<code>` or `/register?code=<code>` with the email field prefilled and frozen to the invited email → back to this check.
+  - Yes, but not with the invited email → mismatch message with a logout button and links to login/register.
+  - Yes, with the invited email → accept the invitation → `/dashboard/[wallet-id]`
+
+**Access & data rules:**
+- Anon must **never** get a select policy on `invitations`: it would expose every invitation's names and emails. The invitation page instead calls a `security definer` function that takes one code and returns only what the page needs: the owner's name, the partner's name and the partner's email.
+- `accept_invitation(code)` is a `security definer` function (with `search_path = ''`), because the partner isn't a wallet member yet, so RLS won't let them set `partner_id`. Before writing anything, it checks that the invitation exists, the caller's **confirmed** email matches `partner_email`, the wallet has no partner yet, and the caller isn't the owner. Then, in one transaction, it sets `wallets.partner_id`, copies `partner_name` into the caller's profile, and invalidates the invitation.
+- After launch: send the invite link by email, and let the partner request the invitation be sent to a different email.
 
 ### Dashboard: `/dashboard/[wallet-id]`
-- Shows a yellow "waiting for partner" banner if the partner hasn't joined, but **all features stay enabled**.
+- Shows a yellow "waiting for partner" banner with an **Invite Partner** action if the partner hasn't joined, but **all features stay enabled**.
 - Contents:
   - Category-wise expense summary
   - Charts
@@ -69,7 +86,7 @@ Follow these routes and redirect rules when building pages and routing. Check he
   - Navigation
   - Month overview
   - Budget progress bars
-- Navigates to: Add Transaction modal, All Transactions, Settings, Budgets.
+- Navigates to: Invite Partner, Add Transaction modal, All Transactions, Settings, Budgets.
 
 ### All Transactions: `/transactions?page=x&pageSize=y&orderBy=x&filter=...`
 - In-place editing.
@@ -94,9 +111,9 @@ A route-driven modal opened with `add?type=...` on the parent route. There are t
 
 | `type`              | Form    | Routes                                                                                   |
 | ------------------- | ------- | ---------------------------------------------------------------------------------------- |
-| `expense`           | Expense | `/dashboard/add`, `/transactions/add`                                                    |
-| `income`            | Income  | `/dashboard/add`, `/transactions/add`                                                    |
-| `recurring-expense` | Expense | `/dashboard/add`, `/transactions/add`, `/settings/recurring-transactions/add`            |
-| `recurring-income`  | Income  | `/dashboard/add`, `/transactions/add`, `/settings/recurring-transactions/add`            |
+| `expense`           | Expense | `/dashboard/[wallet-id]/add`, `/transactions/add`                                         |
+| `income`            | Income  | `/dashboard/[wallet-id]/add`, `/transactions/add`                                         |
+| `recurring-expense` | Expense | `/dashboard/[wallet-id]/add`, `/transactions/add`, `/settings/recurring-transactions/add` |
+| `recurring-income`  | Income  | `/dashboard/[wallet-id]/add`, `/transactions/add`, `/settings/recurring-transactions/add` |
 
 > Open question: the recurring transactions page lives at `/transactions/recurring-transactions`, but its add modal is listed at `/settings/recurring-transactions/add`. Confirm which path is correct.

@@ -2,7 +2,7 @@ import { Container } from "@/components/Container";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
-import { Outlet, useNavigate } from "@tanstack/react-router";
+import { Outlet, useMatch, useNavigate } from "@tanstack/react-router";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app")({
@@ -12,6 +12,18 @@ export const Route = createFileRoute("/_app")({
     if (!data.session) {
       throw redirect({ to: "/login" });
     }
+    return { session: data.session };
+  },
+  async loader({ context }) {
+    const session = context.session;
+    const { data } = await supabase
+      .from("profiles")
+      .select("name")
+      .eq("id", session.user.id)
+      .single();
+
+
+    return { userName: data?.name };
   },
 });
 
@@ -19,7 +31,7 @@ function AppLayout() {
   return (
     <>
       <AppHeader />
-      <main className="py-8">
+      <main className="py-4">
         <Container>
           <Outlet />
         </Container>
@@ -29,8 +41,22 @@ function AppLayout() {
 }
 
 function AppHeader() {
+  const data = Route.useLoaderData();
+  const walletMatch = useMatch({
+    from: "/_app/dashboard/$walletId",
+    shouldThrow: false,
+  });
+
+  const walletName = walletMatch?.loaderData?.name;
+
   return (
-    <Header>
+    <Header walletName={walletName}>
+      {data.userName && (
+        <p>
+          <span>Hello</span>,{" "}
+          <strong className="font-normal">{data.userName}</strong>
+        </p>
+      )}
       <LogoutButton />
     </Header>
   );
