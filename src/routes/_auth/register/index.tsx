@@ -95,7 +95,7 @@ function RegisterPage() {
           </Button>
           <p className="text-sm">
             Already have an account?{" "}
-            <Link to="/login" className="underline underline-offset-4">
+            <Link to="/login" className="underline underline-offset-4 text-link">
               Log in
             </Link>
           </p>

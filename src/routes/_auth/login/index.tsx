@@ -91,7 +91,7 @@ function LoginPage() {
           </Button>
           <p className="text-sm">
             Don't have an account?{" "}
-            <Link to="/register" className="underline underline-offset-4">
+            <Link to="/register" className="underline underline-offset-4 text-link">
               Create one
             </Link>
           </p>
