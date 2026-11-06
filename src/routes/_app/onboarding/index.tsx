@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createFileRoute,
+  redirect,
   useNavigate,
   useRouter,
 } from "@tanstack/react-router";
@@ -13,6 +14,13 @@ import { z } from "zod";
 
 export const Route = createFileRoute("/_app/onboarding/")({
   component: OnboardingPage,
+  async beforeLoad() {
+    const { data } = await supabase.from("wallets").select("id").limit(1);
+
+    if (data && data.length == 1) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
 });
 
 const WALLET_MAX_LENGTH = 50;
