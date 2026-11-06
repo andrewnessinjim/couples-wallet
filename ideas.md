@@ -18,6 +18,7 @@
 
 1. Send the invite link by email (v1 only shows a "Copy link" button). Use the same SMTP provider as the sign-up confirmation emails, called from an Edge Function.
 2. Let the partner request the invitation be sent to a different email.
+3. Love letters: a muted link below the Invite button in the invite dialog, "When was the last time you wrote them a love letter?". Once the owner types the partner's name, "them" becomes the name ("...wrote Andrea a love letter?"). Clicking it lets the owner write a love letter to the partner. Needs a place to write, store and deliver the letter.
 
 ## Tooling
 
