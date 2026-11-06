@@ -1,22 +1,34 @@
+import { InvitePartnerBanner } from "@/components/InvitePartnerBanner";
 import { supabase } from "@/lib/supabase";
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app/dashboard/$walletId")({
   async loader({ params }) {
     const { data, error } = await supabase
       .from("wallets")
-      .select("name")
+      .select("name,owner_id,partner_id, invitations(id)")
       .eq("id", params.walletId)
       .single();
 
     if (error) throw error;
     if (!data) throw notFound();
 
-    return { name: data.name };
+    return { ...data };
   },
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  return <div>Hello</div>;
+  const walletData = Route.useLoaderData();
+
+  return (
+    <div>
+      <InvitePartnerBanner
+        ownerId={walletData.owner_id}
+        partnerId={walletData.partner_id}
+        invitationId={walletData.invitations?.id}
+      />
+      <Outlet />
+    </div>
+  );
 }

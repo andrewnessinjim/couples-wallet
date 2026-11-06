@@ -37,8 +37,6 @@ const onboardingSchema = z.object({
     .trim()
     .min(1, "Name is required.")
     .max(NAME_MAX_LENGTH, `Must be at most ${NAME_MAX_LENGTH} characters.`),
-  partnerName: z.string().trim().min(1, "Partner name is required."),
-  partnerEmail: z.email("Enter a valid email address."),
 });
 
 type OnboardingValues = z.infer<typeof onboardingSchema>;
@@ -50,8 +48,6 @@ function OnboardingPage() {
     defaultValues: {
       walletName: "Money Bag",
       name: "",
-      partnerName: "",
-      partnerEmail: "",
     },
   });
   const navigate = useNavigate();
@@ -102,20 +98,6 @@ function OnboardingPage() {
             label="Your Name"
             control={form.control}
             maxLength={NAME_MAX_LENGTH}
-          />
-
-          <FormInput
-            type="text"
-            name="partnerName"
-            label="Partner Name"
-            control={form.control}
-          />
-
-          <FormInput
-            type="email"
-            name="partnerEmail"
-            label="Partner Email"
-            control={form.control}
           />
         </FieldGroup>
         <div className="mt-6">

@@ -23,7 +23,27 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "profiles": {
+            "invitations": {
+                  Row: {
+                    "id": string,"partner_email": string,"partner_name": string,"wallet_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: string,"partner_email": string,"partner_name": string,"wallet_id"?: string | null
+                  }
+                  Update: {
+                    "id"?: string,"partner_email"?: string,"partner_name"?: string,"wallet_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "invitations_wallet_id_fkey"
+      columns: ["wallet_id"]
+isOneToOne: true
+      referencedRelation: "wallets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"profiles": {
                   Row: {
                     "id": string,"name": string | null
                   }
@@ -57,8 +77,19 @@ export type Database = {
             [_ in never]: never
           }
           Functions: {
-            "create_wallet":
+            "accept_invitation":
+{ Args: { "p_code": string }; Returns: string
+                           },
+"create_wallet":
 { Args: { "p_owner_name": string,"p_wallet_name": string }; Returns: string
+                           },
+"find_invitation":
+{ Args: { "p_code": string }; Returns: {
+              "owner_name": string,"partner_email": string,"partner_has_account": boolean,"partner_name": string,"wallet_name": string
+            }[]
+                           },
+"is_wallet_owner":
+{ Args: { "p_wallet_id": string }; Returns: boolean
                            }
           }
           Enums: {

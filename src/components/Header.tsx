@@ -3,7 +3,7 @@ import { Container } from "./Container";
 import { Link } from "@tanstack/react-router";
 
 interface Props {
-  children: ReactNode;
+  children?: ReactNode;
   walletName?: string;
 }
 export function Header({ children, walletName }: Props) {

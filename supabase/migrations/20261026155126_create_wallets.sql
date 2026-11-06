@@ -1,6 +1,9 @@
+create domain text_1_to_50 as text
+check (length(trim(value)) between 1 and 50);
+
 create table public.wallets (
     id uuid primary key default gen_random_uuid(),
-    name text not null constraint wallets_name_length check (length(trim(name)) <= 50 and length(trim(name)) >= 1),
+    name text_1_to_50 not null,
     owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
     partner_id uuid references auth.users(id) on delete set null,
     created_at timestamptz not null default now(),

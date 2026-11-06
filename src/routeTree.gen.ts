@@ -9,20 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as PublicRouteImport } from './routes/_public'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicEmailConfirmationRouteImport } from './routes/_public/email-confirmation'
+import { Route as PublicInvalidInvitationRouteImport } from './routes/_public/invalid-invitation'
+import { Route as PublicInvitationRouteImport } from './routes/_public/invitation'
 import { Route as AppDashboardIndexRouteImport } from './routes/_app/dashboard/index'
 import { Route as AppDashboardWalletIdRouteImport } from './routes/_app/dashboard/$walletId'
 import { Route as AppOnboardingIndexRouteImport } from './routes/_app/onboarding/index'
 import { Route as AuthLoginIndexRouteImport } from './routes/_auth/login/index'
 import { Route as AuthRegisterIndexRouteImport } from './routes/_auth/register/index'
+import { Route as AppDashboardWalletIdInvitePartnerRouteImport } from './routes/_app/dashboard/$walletId/invite-partner'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -30,6 +30,30 @@ const AppRoute = AppRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PublicRoute = PublicRouteImport.update({
+  id: '/_public',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicIndexRoute = PublicIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicEmailConfirmationRoute = PublicEmailConfirmationRouteImport.update({
+  id: '/email-confirmation',
+  path: '/email-confirmation',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicInvalidInvitationRoute = PublicInvalidInvitationRouteImport.update({
+  id: '/invalid-invitation',
+  path: '/invalid-invitation',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicInvitationRoute = PublicInvitationRouteImport.update({
+  id: '/invitation',
+  path: '/invitation',
+  getParentRoute: () => PublicRoute,
 } as any)
 const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   id: '/dashboard/',
@@ -56,78 +80,103 @@ const AuthRegisterIndexRoute = AuthRegisterIndexRouteImport.update({
   path: '/register/',
   getParentRoute: () => AuthRoute,
 } as any)
+const AppDashboardWalletIdInvitePartnerRoute =
+  AppDashboardWalletIdInvitePartnerRouteImport.update({
+    id: '/invite-partner',
+    path: '/invite-partner',
+    getParentRoute: () => AppDashboardWalletIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/dashboard/$walletId': typeof AppDashboardWalletIdRoute
+  '/': typeof PublicIndexRoute
+  '/email-confirmation': typeof PublicEmailConfirmationRoute
+  '/invalid-invitation': typeof PublicInvalidInvitationRoute
+  '/invitation': typeof PublicInvitationRoute
+  '/dashboard/$walletId': typeof AppDashboardWalletIdRouteWithChildren
   '/dashboard/': typeof AppDashboardIndexRoute
   '/onboarding/': typeof AppOnboardingIndexRoute
   '/login/': typeof AuthLoginIndexRoute
   '/register/': typeof AuthRegisterIndexRoute
+  '/dashboard/$walletId/invite-partner': typeof AppDashboardWalletIdInvitePartnerRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/dashboard/$walletId': typeof AppDashboardWalletIdRoute
+  '/': typeof PublicIndexRoute
+  '/email-confirmation': typeof PublicEmailConfirmationRoute
+  '/invalid-invitation': typeof PublicInvalidInvitationRoute
+  '/invitation': typeof PublicInvitationRoute
+  '/dashboard/$walletId': typeof AppDashboardWalletIdRouteWithChildren
   '/dashboard': typeof AppDashboardIndexRoute
   '/onboarding': typeof AppOnboardingIndexRoute
   '/login': typeof AuthLoginIndexRoute
   '/register': typeof AuthRegisterIndexRoute
+  '/dashboard/$walletId/invite-partner': typeof AppDashboardWalletIdInvitePartnerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
-  '/_app/dashboard/$walletId': typeof AppDashboardWalletIdRoute
+  '/_public': typeof PublicRouteWithChildren
+  '/_public/email-confirmation': typeof PublicEmailConfirmationRoute
+  '/_public/invalid-invitation': typeof PublicInvalidInvitationRoute
+  '/_public/invitation': typeof PublicInvitationRoute
+  '/_public/': typeof PublicIndexRoute
+  '/_app/dashboard/$walletId': typeof AppDashboardWalletIdRouteWithChildren
   '/_app/dashboard/': typeof AppDashboardIndexRoute
   '/_app/onboarding/': typeof AppOnboardingIndexRoute
   '/_auth/login/': typeof AuthLoginIndexRoute
   '/_auth/register/': typeof AuthRegisterIndexRoute
+  '/_app/dashboard/$walletId/invite-partner': typeof AppDashboardWalletIdInvitePartnerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/email-confirmation'
+    | '/invalid-invitation'
+    | '/invitation'
     | '/dashboard/$walletId'
     | '/dashboard/'
     | '/onboarding/'
     | '/login/'
     | '/register/'
+    | '/dashboard/$walletId/invite-partner'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/email-confirmation'
+    | '/invalid-invitation'
+    | '/invitation'
     | '/dashboard/$walletId'
     | '/dashboard'
     | '/onboarding'
     | '/login'
     | '/register'
+    | '/dashboard/$walletId/invite-partner'
   id:
     | '__root__'
-    | '/'
     | '/_app'
     | '/_auth'
+    | '/_public'
+    | '/_public/email-confirmation'
+    | '/_public/invalid-invitation'
+    | '/_public/invitation'
+    | '/_public/'
     | '/_app/dashboard/$walletId'
     | '/_app/dashboard/'
     | '/_app/onboarding/'
     | '/_auth/login/'
     | '/_auth/register/'
+    | '/_app/dashboard/$walletId/invite-partner'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  PublicRoute: typeof PublicRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -141,6 +190,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PublicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/': {
+      id: '/_public/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/email-confirmation': {
+      id: '/_public/email-confirmation'
+      path: '/email-confirmation'
+      fullPath: '/email-confirmation'
+      preLoaderRoute: typeof PublicEmailConfirmationRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/invalid-invitation': {
+      id: '/_public/invalid-invitation'
+      path: '/invalid-invitation'
+      fullPath: '/invalid-invitation'
+      preLoaderRoute: typeof PublicInvalidInvitationRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/invitation': {
+      id: '/_public/invitation'
+      path: '/invitation'
+      fullPath: '/invitation'
+      preLoaderRoute: typeof PublicInvitationRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/_app/dashboard/': {
       id: '/_app/dashboard/'
@@ -177,17 +261,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterIndexRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_app/dashboard/$walletId/invite-partner': {
+      id: '/_app/dashboard/$walletId/invite-partner'
+      path: '/invite-partner'
+      fullPath: '/dashboard/$walletId/invite-partner'
+      preLoaderRoute: typeof AppDashboardWalletIdInvitePartnerRouteImport
+      parentRoute: typeof AppDashboardWalletIdRoute
+    }
   }
 }
 
+interface AppDashboardWalletIdRouteChildren {
+  AppDashboardWalletIdInvitePartnerRoute: typeof AppDashboardWalletIdInvitePartnerRoute
+}
+
+const AppDashboardWalletIdRouteChildren: AppDashboardWalletIdRouteChildren = {
+  AppDashboardWalletIdInvitePartnerRoute:
+    AppDashboardWalletIdInvitePartnerRoute,
+}
+
+const AppDashboardWalletIdRouteWithChildren =
+  AppDashboardWalletIdRoute._addFileChildren(AppDashboardWalletIdRouteChildren)
+
 interface AppRouteChildren {
-  AppDashboardWalletIdRoute: typeof AppDashboardWalletIdRoute
+  AppDashboardWalletIdRoute: typeof AppDashboardWalletIdRouteWithChildren
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
   AppOnboardingIndexRoute: typeof AppOnboardingIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppDashboardWalletIdRoute: AppDashboardWalletIdRoute,
+  AppDashboardWalletIdRoute: AppDashboardWalletIdRouteWithChildren,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
   AppOnboardingIndexRoute: AppOnboardingIndexRoute,
 }
@@ -206,10 +309,27 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface PublicRouteChildren {
+  PublicEmailConfirmationRoute: typeof PublicEmailConfirmationRoute
+  PublicInvalidInvitationRoute: typeof PublicInvalidInvitationRoute
+  PublicInvitationRoute: typeof PublicInvitationRoute
+  PublicIndexRoute: typeof PublicIndexRoute
+}
+
+const PublicRouteChildren: PublicRouteChildren = {
+  PublicEmailConfirmationRoute: PublicEmailConfirmationRoute,
+  PublicInvalidInvitationRoute: PublicInvalidInvitationRoute,
+  PublicInvitationRoute: PublicInvitationRoute,
+  PublicIndexRoute: PublicIndexRoute,
+}
+
+const PublicRouteWithChildren =
+  PublicRoute._addFileChildren(PublicRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  PublicRoute: PublicRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

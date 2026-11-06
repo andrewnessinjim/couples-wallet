@@ -10,14 +10,38 @@ import {
 import { FieldError, FieldGroup } from "@/components/ui/field";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { FormInput } from "../../../components/FormInput";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/_auth/register/")({
+  validateSearch: z.object({ code: z.string().optional() }),
   component: RegisterPage,
+  loaderDeps: ({ search }) => ({ code: search.code }),
+  async loader({ deps }) {
+    const { code } = deps;
+    console.log({ code });
+    if (code) {
+      const { data, error } = await supabase
+        .rpc("find_invitation", {
+          p_code: code,
+        })
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw redirect({ to: "/invalid-invitation" });
+
+      return { email: data?.partner_email };
+    }
+    return { email: undefined };
+  },
 });
 
 const registerSchema = z
@@ -35,19 +59,35 @@ type RegisterValues = z.infer<typeof registerSchema>;
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const { email } = Route.useLoaderData();
+  console.log({ email });
+  const { code } = Route.useSearch();
+
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { email: "", password: "", repeatPassword: "" },
+    defaultValues: {
+      email: email ?? "",
+      password: "",
+      repeatPassword: "",
+    },
   });
 
   async function onSubmit({ email, password }: RegisterValues) {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const emailRedirectTo = code
+      ? `${window.location.origin}/invitation?code=${code}`
+      : `${window.location.origin}/dashboard`;
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo },
+    });
+
     if (error) {
       form.setError("root", { message: error.message });
       return;
     }
 
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/email-confirmation" });
   }
 
   const formRootError = form.formState.errors.root;
@@ -65,6 +105,7 @@ function RegisterPage() {
               name="email"
               type="email"
               label="Email"
+              readOnly={email !== undefined}
               autoComplete="email"
               control={form.control}
             />
@@ -95,7 +136,10 @@ function RegisterPage() {
           </Button>
           <p className="text-sm">
             Already have an account?{" "}
-            <Link to="/login" className="underline underline-offset-4 text-link">
+            <Link
+              to="/login"
+              className="underline underline-offset-4 text-link"
+            >
               Log in
             </Link>
           </p>

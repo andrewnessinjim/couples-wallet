@@ -1,6 +1,6 @@
 create table public.profiles(
     id uuid primary key references auth.users(id) on delete cascade,
-    name text constraint profiles_name_length check (length(trim(name)) <= 50 and length(trim(name)) >= 1)
+    name text_1_to_50
 );
 
 alter table public.profiles enable row level security;
