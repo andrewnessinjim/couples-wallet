@@ -50,8 +50,6 @@ function AppHeader() {
   const ownerName = walletMatch?.loaderData?.owner_profile?.name;
   const partnerName = walletMatch?.loaderData?.partner_profile?.name;
 
-  console.log({ ownerName, partnerName });
-
   return (
     <Header
       walletName={walletName}
