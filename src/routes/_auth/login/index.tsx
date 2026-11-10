@@ -1,5 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useLoaderData,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -19,7 +24,6 @@ export const Route = createFileRoute("/_auth/login/")({
   component: LoginPage,
 });
 
-// 1. What valid form data looks like
 const loginSchema = z.object({
   email: z.email("Enter a valid email address"),
   password: z.string().min(1, "Password is required"),
@@ -28,14 +32,14 @@ const loginSchema = z.object({
 type LoginValues = z.infer<typeof loginSchema>;
 
 function LoginPage() {
-  // 2. The form, validated by the zod schema
+  const { partnerEmail } = useLoaderData({ from: "/_auth" });
+  const { code } = Route.useSearch();
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: partnerEmail ?? "", password: "" },
   });
   const navigate = useNavigate();
 
-  // 3. Only runs when validation passes
   async function onSubmit({ email, password }: LoginValues) {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -47,7 +51,11 @@ function LoginPage() {
       return;
     }
 
-    navigate({ to: "/dashboard" });
+    if (code) {
+      navigate({ to: "/invitation", search: { code } });
+    } else {
+      navigate({ to: "/dashboard" });
+    }
   }
 
   const formRootError = form.formState.errors.root;
@@ -67,6 +75,7 @@ function LoginPage() {
               name="email"
               type="email"
               label="Email"
+              readOnly={!!partnerEmail}
               autoComplete="email"
               control={form.control}
             />
@@ -91,7 +100,10 @@ function LoginPage() {
           </Button>
           <p className="text-sm">
             Don't have an account?{" "}
-            <Link to="/register" className="underline underline-offset-4 text-link">
+            <Link
+              to="/register"
+              className="underline underline-offset-4 text-link"
+            >
               Create one
             </Link>
           </p>

@@ -5,14 +5,36 @@ import {
   Outlet,
   redirect,
 } from "@tanstack/react-router";
+import { z } from "zod";
 
 export const Route = createFileRoute("/_auth")({
   component: AuthLayout,
+  validateSearch: z.object({ code: z.string().optional() }),
   async beforeLoad() {
     const { data } = await supabase.auth.getSession();
     if (data.session) {
       throw redirect({ to: "/dashboard" });
     }
+  },
+  loaderDeps: ({ search }) => ({ code: search.code }),
+  async loader({ deps }) {
+    const { code } = deps;
+
+    let partnerEmail = null;
+    if (code) {
+      const { data, error } = await supabase
+        .rpc("find_invitation", {
+          p_code: code,
+        })
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw redirect({ to: "/invalid-invitation" });
+
+      partnerEmail = data?.partner_email;
+    }
+
+    return { partnerEmail };
   },
 });
 

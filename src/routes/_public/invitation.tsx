@@ -163,7 +163,10 @@ function AcceptSection() {
   const formRootError = acceptForm.formState.errors.root;
 
   return (
-    <form onSubmit={acceptForm.handleSubmit(handleSubmit)} className="flex flex-col gap-3">
+    <form
+      onSubmit={acceptForm.handleSubmit(handleSubmit)}
+      className="flex flex-col gap-3"
+    >
       <p>
         Your email <strong>{partner_email}</strong> has been verified. After you
         accept the invitation below, you'll both see and add transactions in one
@@ -182,11 +185,20 @@ function AcceptSection() {
 }
 
 function LoginSection() {
+  const router = useRouter();
+  const { code } = Route.useSearch();
+
   return (
     <>
       You already have an account with us. Please log in and you can accept the
       invitation.
-      <Button>Login</Button>
+      <Button
+        onClick={() =>
+          router.navigate({ to: "/login", search: { code: code } })
+        }
+      >
+        Login
+      </Button>
     </>
   );
 }
