@@ -6,7 +6,16 @@ export const Route = createFileRoute("/_app/dashboard/$walletId")({
   async loader({ params }) {
     const { data, error } = await supabase
       .from("wallets")
-      .select("name,owner_id,partner_id, invitations(id)")
+      .select(
+        `
+        name,
+        owner_id,
+        partner_id,
+        invitations(id),
+        owner_profile:profiles!owner_id(name),
+        partner_profile:profiles!partner_id(name)
+      `,
+      )
       .eq("id", params.walletId)
       .single();
 

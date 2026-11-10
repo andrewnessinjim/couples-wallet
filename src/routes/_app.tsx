@@ -22,7 +22,6 @@ export const Route = createFileRoute("/_app")({
       .eq("id", session.user.id)
       .single();
 
-
     return { userName: data?.name };
   },
 });
@@ -48,9 +47,17 @@ function AppHeader() {
   });
 
   const walletName = walletMatch?.loaderData?.name;
+  const ownerName = walletMatch?.loaderData?.owner_profile?.name;
+  const partnerName = walletMatch?.loaderData?.partner_profile?.name;
+
+  console.log({ ownerName, partnerName });
 
   return (
-    <Header walletName={walletName}>
+    <Header
+      walletName={walletName}
+      ownerName={ownerName}
+      partnerName={partnerName}
+    >
       {data.userName && (
         <p>
           <span>Hello</span>,{" "}
