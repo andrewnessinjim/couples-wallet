@@ -35,7 +35,8 @@ Everything else in the routes below comes after launch: budgets, recurring trans
 - Prefer popular, well-documented, mainstream tools and patterns that students can follow and that are good for YouTube.
 - Keep code readable and teachable over clever.
 - **Migrations before launch:** nothing is deployed until v1 launches, so edit existing migrations in place to keep them organized (one migration per table or concept). Only suggest a new migration for a new concept. After launch, never edit a deployed migration.
-- **Don't make changes on your own.** By default, give the user step-by-step instructions to follow. Only edit files, install packages or run setup commands when the user explicitly asks you to.
+- **Don't make changes on your own.** Only edit files, install packages or run setup commands when the user explicitly asks you to.
+- **Don't give solutions unless asked.** Answer the question that was asked. Only give code, fixes or step-by-step instructions when the user explicitly asks for them.
 
 ## System flow & routes
 
