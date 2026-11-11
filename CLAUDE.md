@@ -13,17 +13,23 @@ The app is not launchable without all of these:
 - **Auth**: register, login, logout.
 - **Onboarding**: create a wallet (wallet name and your name).
 - **Invitations**: from the dashboard, the owner invites the partner and gets a shareable link to send them (sending it by email comes after launch). The partner joins through the invitation flow below.
-- **Transactions**: add expenses and income, and view them.
+- **Transactions**: add expenses and income with an inline row (see "Adding transactions"), and view them.
 - **Summary**: one summary view on the dashboard.
 - **Payments**: hosted checkout, one webhook, and the customer portal (see below).
 
 Everything else in the routes below comes after launch: budgets, recurring transactions, charts, in-place editing, and filters and pagination on All Transactions. Push back on building any of it before v1 ships.
 
+### Product direction
+- **Spreadsheet-like experience**: working with transactions should feel like an Excel sheet, not like filling in forms. This is the product's defining behavior, so it's in scope for v1 and isn't "UI polish" to push back on. Push back on extending it beyond what v1 needs, though.
+- **Desktop only in v1** for the dashboard and transactions. No phone layout for them.
+- Landing, auth, onboarding and invitation pages are simple forms and text, and must stay usable on phones: invitation links and confirmation emails are often opened there.
+- The app launches at **sitdownapps.com**.
+
 ### Payments & hosting
 - Payments are part of the initial release, kept as simple as possible: hosted checkout, one webhook, and the provider's customer portal.
 - The goal is to **break even, not to make a profit**: be able to say "10 paying users" on a resume without losing money if the app is left running long term.
 - Planned price: **$4.99/year per couple**, through a merchant of record (Paddle / Lemon Squeezy) so they handle sales tax and VAT.
-- Keep running costs near zero: stay on free tiers and avoid anything with a fixed monthly fee. The only expected fixed cost is the domain.
+- Keep running costs near zero: stay on free tiers and avoid anything with a fixed monthly fee. The only expected fixed cost is the domain (sitdownapps.com).
 - **Backend: Supabase** (free plan). It pauses projects after ~1 week of low database activity, so plan for that:
   - At deployment, set up a **keep-alive ping**: an external free cron service (e.g. cron-job.org) makes a small API request to the project every 3–4 days. Prefer this over GitHub Actions, which disables scheduled workflows after ~60 days without commits.
   - Supabase's terms and docs (checked 2026-10-22) neither allow nor forbid keep-alive pings. The pausing docs list API calls as a way to generate activity, but say "user database activity" counts, so pings may stop working. Re-check before relying on it.
@@ -56,7 +62,7 @@ Follow these routes and redirect rules when building pages and routing. Check he
 - Names live in a `public.profiles` table (one row per user, `id` → `auth.users`), so partners can see each other's names. RLS: you can read your own profile and your partner's.
 - A trigger on `auth.users` creates the profile at sign-up with an empty name (`name` is nullable).
 - The owner's name is set in onboarding. The partner's name is the one the owner typed in the invite form: it's stored on the invitation and copied to the partner's profile when they accept, so the partner never fills in a name form.
-- Editing your own name in Settings comes after launch.
+- Editing your own name (from the user menu) comes after launch.
 
 ### Invitation flow
 **Owner invites:**
@@ -83,38 +89,36 @@ Follow these routes and redirect rules when building pages and routing. Check he
 - Contents:
   - Category-wise expense summary
   - Charts
-  - Recent transactions (in-place editing)
+  - Recent transactions, with an **Add** button for an inline row (in-place editing after launch)
   - Navigation
   - Month overview
   - Budget progress bars
-- Navigates to: Invite Partner, Add Transaction modal, All Transactions, Settings, Budgets.
+- Navigates to: Invite Partner, All Transactions, Budgets, and the user menu items.
 
 ### All Transactions: `/transactions?page=x&pageSize=y&orderBy=x&filter=...`
 - In-place editing.
-- Can open the Add Transaction modal.
+- **Add** button for an inline row.
 - Links to Recurring Transactions.
 
 ### Recurring Transactions: `/transactions/recurring-transactions`
 - In-place editing.
-- "New Recurring Transaction" opens the Add Transaction modal.
+- "New Recurring Transaction" adds an inline row.
 
-### Settings: `/settings`
-- Recurring Transactions (links to the recurring transactions page)
-- Wallets & Partners
-- Subscription
-- Logout
-- Support
+### Navigation
+**Main navigation (features):**
+- v1: Dashboard, Transactions. Later: Recurring Transactions.
+- Placement: in the header, once the user's name and Logout have moved into the user menu. If the header still feels noisy, move it to a second row below the header instead (which also leaves room for animations later).
+
+**User menu (settings):**
+- Clicking the user's name at the top right opens a popover menu. It replaces a separate `/settings` page.
+- v1: Subscription, Logout.
+- After launch: Wallets & Partners, Support.
 
 ### Budgets: `/budgets`
 
-### Add Transaction Modal
-A route-driven modal opened with `add?type=...` on the parent route. There are two form components, **Expense Form** and **Income Form**.
+### Adding transactions (inline row)
+No modal and no separate route. Clicking **Add** inserts an empty row directly in the transactions list, with a **Save** button at the end of the row. It covers both expenses and income.
 
-| `type`              | Form    | Routes                                                                                   |
-| ------------------- | ------- | ---------------------------------------------------------------------------------------- |
-| `expense`           | Expense | `/dashboard/[wallet-id]/add`, `/transactions/add`                                         |
-| `income`            | Income  | `/dashboard/[wallet-id]/add`, `/transactions/add`                                         |
-| `recurring-expense` | Expense | `/dashboard/[wallet-id]/add`, `/transactions/add`, `/settings/recurring-transactions/add` |
-| `recurring-income`  | Income  | `/dashboard/[wallet-id]/add`, `/transactions/add`, `/settings/recurring-transactions/add` |
-
-> Open question: the recurring transactions page lives at `/transactions/recurring-transactions`, but its add modal is listed at `/settings/recurring-transactions/add`. Confirm which path is correct.
+> Open questions for v1:
+> - Keyboard behavior: which spreadsheet keys are in v1 (e.g. Tab between cells, Enter to save) and which come later (e.g. arrow-key navigation)?
+> - In-place editing is listed as after launch. Does it stay there, or move into v1 as part of the spreadsheet feel?
