@@ -1,9 +1,18 @@
 import { Container } from "@/components/Container";
 import { Header } from "@/components/Header";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/lib/supabase";
+import { UserIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Outlet, useMatch, useNavigate } from "@tanstack/react-router";
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { cn } from "cn";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -56,26 +65,33 @@ function AppHeader() {
       ownerName={ownerName}
       partnerName={partnerName}
     >
-      {data.userName && (
-        <p>
-          <span>Hello</span>,{" "}
-          <strong className="font-normal">{data.userName}</strong>
-        </p>
-      )}
-      <LogoutButton />
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          className={cn(buttonVariants({ size: "icon" }), "rounded-full")}
+        >
+          <span className="sr-only">Account Menu</span>
+
+          <span className="text-2xl font-semibold">
+            {data.userName ? (
+              data.userName[0]
+            ) : (
+              <HugeiconsIcon icon={UserIcon} />
+            )}
+          </span>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <LogoutMenuItem />
+        </DropdownMenuContent>
+      </DropdownMenu>
     </Header>
   );
 }
-function LogoutButton() {
+function LogoutMenuItem() {
   const navigate = useNavigate();
   async function handleLogout() {
     await supabase.auth.signOut();
     navigate({ to: "/" });
   }
 
-  return (
-    <Button variant="ghost" onClick={handleLogout}>
-      Logout
-    </Button>
-  );
+  return <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>;
 }
