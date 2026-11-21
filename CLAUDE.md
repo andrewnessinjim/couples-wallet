@@ -18,6 +18,7 @@ The app is not launchable without all of these:
 - **Transactions**: add expenses and income with an inline row (see "Adding transactions"), and view them.
 - **Summary**: one summary view on the dashboard.
 - **Payments**: hosted checkout, one webhook, and the customer portal (see below).
+- **E2E tests for payments**: Playwright tests for the happy payment path, since it's the part of the app where a bug costs money. Only the happy path in v1; more E2E coverage comes after launch.
 
 Everything else in the routes below comes after launch: budgets, recurring transactions, charts, in-place editing, and filters and pagination on All Transactions. Push back on building any of it before v1 ships.
 
