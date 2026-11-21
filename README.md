@@ -20,6 +20,10 @@ One partner creates the wallet and invites the other with a link. Once both have
 - Dashboard summary: spending by category for the month
 - Payments: a yearly subscription per couple
 
+## How I built this
+
+I designed and wrote this project myself. I used [Claude](https://claude.ai) as a code reviewer, and to generate repetitive code where there was nothing new for me to learn. I know what every line in the project does.
+
 ## Tech stack
 
 - **Frontend:** React, TypeScript, Vite, TanStack Router, Tailwind CSS, shadcn/ui (Base UI)
