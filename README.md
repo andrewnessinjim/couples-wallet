@@ -19,6 +19,7 @@ One partner creates the wallet and invites the other with a link. Once both have
 - Transactions: add and view expenses and income in a spreadsheet-like grid
 - Dashboard summary: spending by category for the month
 - Payments: a yearly subscription per couple
+- End-to-end tests with [Playwright](https://playwright.dev) for the happy payment path
 
 ## How I built this
 
