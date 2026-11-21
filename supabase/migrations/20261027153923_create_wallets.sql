@@ -27,6 +27,21 @@ create trigger handle_updated_at
 
 alter table public.wallets enable row level security;
 
+create function public.is_wallet_member(p_wallet_id uuid)
+returns boolean
+language sql
+stable
+set search_path = ''
+as
+$$
+select exists (
+    select 1
+    from public.wallets w
+    where w.id = p_wallet_id
+          and (w.owner_id=auth.uid() or w.partner_id=auth.uid())
+)
+$$;
+
 create policy "Partners can view their wallet"
 on public.wallets
 for select
