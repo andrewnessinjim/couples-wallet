@@ -6,6 +6,8 @@ A shared wallet app for two partners to track expenses, income, recurring transa
 
 This is an **educational project**. It will be open-sourced, deployed, and built on a YouTube channel to attract students and teach real-world app building.
 
+**Priorities:** impressing an employer comes first, teaching comes second. The app is a portfolio piece, so when the two conflict, choose what an employer reviewing the code and the product would respect (sound data modeling, security, correctness) over what's simplest to teach.
+
 The current priority is to **ship a working version fast**: build it, open-source it, deploy it, and launch the channel. Polish and redesigns can come later.
 
 ### v1 scope (launch)
