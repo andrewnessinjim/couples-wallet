@@ -39,3 +39,12 @@ on public.transactions
 for delete
 to authenticated
 using (public.is_wallet_member(wallet_id));
+
+create policy "Wallet members can update transactions in their wallet"
+on public.transactions
+for update
+to authenticated
+using (public.is_wallet_member(wallet_id));
+
+revoke update on public.transactions from authenticated;
+grant update (occurred_on, description, category_id, amount_minor) on public.transactions to authenticated;
