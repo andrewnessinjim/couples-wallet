@@ -10,6 +10,8 @@ select tests.insert_wallet('home', 'owner');
 select tests.add_partner('home', 'partner');
 select tests.insert_wallet('other', 'outsider');
 
+-- Shared by the read-only tests (2 and 3). Tests that change data
+-- insert their own category, so no test sees another test's changes.
 select tests.insert_category('home', 'food', 'Food', 'expense');
 select tests.insert_category('home', 'restaurant', 'Restaurant', 'expense');
 select tests.insert_category('other', 'space_travel', 'Space Travel', 'expense');
@@ -17,7 +19,10 @@ select tests.insert_category('other', 'space_travel', 'Space Travel', 'expense')
 
 select plan(8);
 
--- Outsider inserting a category for the home wallet that he is not a member of
+-- Blocked updates and deletes raise no error, they just affect 0 rows,
+-- so each one is checked afterwards as service_role (which bypasses RLS).
+
+----------------- Test 1: Outsider cannot insert -----------------
 select tests.authenticate_as('outsider');
 select throws_ok(
     $$
@@ -33,23 +38,28 @@ select throws_ok(
             'income'
         )
     $$,
-    42501,
+    '42501',
     null,
     'Outsiders cannot insert categories for wallets they don''t belong to'
 );
 
--- Outsider can only see categories linked to his wallet
+----------------- Test 2: Guard -----------------
 select tests.authenticate_as_service_role();
-
 select is(
-    (select count(*)
-    from public.categories
-    where wallet_id in (tests.to_id('wallets', 'home'), tests.to_id('wallets', 'other'))),
+    (
+        select count(*)
+        from public.categories
+        where id in (
+            tests.to_id('categories', 'food'),
+            tests.to_id('categories', 'restaurant'),
+            tests.to_id('categories', 'space_travel')
+        )
+    ),
     3::bigint,
-    'Guard: the test wallets have 3 categories'
+    'Guard: the shared setup categories exist'
 );
 
-
+----------------- Test 3: Outsider sees only their own categories -----------------
 select tests.authenticate_as('outsider');
 select bag_eq(
     $$
@@ -61,70 +71,87 @@ select bag_eq(
     'The outsider sees only their own wallet''s categories'
 );
 
--- Update and delete: blocked ones raise no error, they just affect 0 rows,
--- so each one is checked afterwards as service_role (which bypasses RLS).
+----------------- Test 4: Outsider cannot rename -----------------
+select tests.authenticate_as_service_role();
+select tests.insert_category('home', 'utilities', 'Utilities', 'expense');
 
--- Outsider tries to rename and delete Home's categories
+select tests.authenticate_as('outsider');
 update public.categories
 set name = 'Hacked'
-where wallet_id = tests.to_id('wallets', 'home') and name = 'Food';
-
-delete from public.categories
-where wallet_id = tests.to_id('wallets', 'home') and name = 'Restaurant';
+where id = tests.to_id('categories', 'utilities');
 
 select tests.authenticate_as_service_role();
-
 select is(
-    (select name::text from public.categories
-     where wallet_id = tests.to_id('wallets', 'home') and name = 'Food'),
-    'Food',
+    (
+        select name::text
+        from public.categories
+        where id = tests.to_id('categories', 'utilities')
+    ),
+    'Utilities',
     'An outsider cannot rename a category of a wallet they don''t belong to'
 );
 
+----------------- Test 5: Outsider cannot delete -----------------
+select tests.authenticate_as_service_role();
+select tests.insert_category('home', 'rent', 'Rent', 'expense');
+
+select tests.authenticate_as('outsider');
+delete from public.categories
+where id = tests.to_id('categories', 'rent');
+
+select tests.authenticate_as_service_role();
 select isnt_empty(
-    $$ select 1 from public.categories
-       where wallet_id = tests.to_id('wallets', 'home') and name = 'Restaurant' $$,
+    $$ select 1 from public.categories where id = tests.to_id('categories', 'rent') $$,
     'An outsider cannot delete a category of a wallet they don''t belong to'
 );
 
--- Partner renames a Home category
-select tests.authenticate_as('partner');
+----------------- Test 6: Partner renames a category -----------------
+select tests.authenticate_as_service_role();
+select tests.insert_category('home', 'fuel', 'Fuel', 'expense');
 
+select tests.authenticate_as('partner');
 update public.categories
-set name = 'Groceries'
-where wallet_id = tests.to_id('wallets', 'home') and name = 'Food';
+set name = 'Gas'
+where id = tests.to_id('categories', 'fuel');
 
 select tests.authenticate_as_service_role();
-
-select isnt_empty(
-    $$ select 1 from public.categories
-       where wallet_id = tests.to_id('wallets', 'home') and name = 'Groceries' $$,
+select is(
+    (
+        select name::text
+        from public.categories
+        where id = tests.to_id('categories', 'fuel')
+    ),
+    'Gas',
     'The partner can rename a category of their wallet'
 );
 
--- Owner tries to move a Home category into a wallet they don't belong to
-select tests.authenticate_as('owner');
+----------------- Test 7: Owner cannot move a category to another wallet -----------------
+select tests.authenticate_as_service_role();
+select tests.insert_category('home', 'gifts', 'Gifts', 'expense');
 
+select tests.authenticate_as('owner');
 select throws_ok(
     $$
         update public.categories
         set wallet_id = tests.to_id('wallets', 'other')
-        where wallet_id = tests.to_id('wallets', 'home') and name = 'Groceries'
+        where id = tests.to_id('categories', 'gifts')
     $$,
     '42501',
     null,
     'A member cannot move a category into a wallet they don''t belong to'
 );
 
--- Owner deletes a Home category
+----------------- Test 8: Owner deletes a category -----------------
+select tests.authenticate_as_service_role();
+select tests.insert_category('home', 'travel', 'Travel', 'expense');
+
+select tests.authenticate_as('owner');
 delete from public.categories
-where wallet_id = tests.to_id('wallets', 'home') and name = 'Restaurant';
+where id = tests.to_id('categories', 'travel');
 
 select tests.authenticate_as_service_role();
-
 select is_empty(
-    $$ select 1 from public.categories
-       where wallet_id = tests.to_id('wallets', 'home') and name = 'Restaurant' $$,
+    $$ select 1 from public.categories where id = tests.to_id('categories', 'travel') $$,
     'The owner can delete a category of their wallet'
 );
 

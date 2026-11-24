@@ -13,6 +13,49 @@ select tests.insert_wallet('other', 'outsider');
 select tests.insert_category('home', 'restaurant', 'Restaurant', 'expense');
 select tests.insert_category('home', 'food', 'Food', 'expense');
 
+-- Each test inserts its own transaction as service_role (which bypasses RLS),
+-- so no test sees another test's changes.
+---------------------------------------------------
+
+select plan(3);
+
+-- Blocked deletes raise no error, they just affect 0 rows,
+-- so each one is checked afterwards as service_role (which bypasses RLS).
+
+----------------- Test 1: Outsider cannot delete -----------------
+select tests.authenticate_as_service_role();
+insert into public.transactions
+(
+    id,
+    wallet_id,
+    occurred_on,
+    description,
+    category_id,
+    amount_minor,
+    created_by
+) values
+(
+    tests.to_id('transactions', 'coffee'),
+    tests.to_id('wallets', 'home'),
+    '2026-11-21',
+    'Coffee',
+    tests.to_id('categories', 'food'),
+    12000,
+    tests.get_supabase_uid('owner')
+);
+
+select tests.authenticate_as('outsider');
+delete from public.transactions
+where id = tests.to_id('transactions', 'coffee');
+
+select tests.authenticate_as_service_role();
+select isnt_empty(
+    $$ select 1 from public.transactions where id = tests.to_id('transactions', 'coffee') $$,
+    'An outsider cannot delete a transaction of a wallet they don''t belong to'
+);
+
+----------------- Test 2: Partner deletes the owner's transaction -----------------
+select tests.authenticate_as_service_role();
 insert into public.transactions
 (
     id,
@@ -31,38 +74,9 @@ insert into public.transactions
     tests.to_id('categories', 'restaurant'),
     50000,
     tests.get_supabase_uid('owner')
-),
-(
-    tests.to_id('transactions', 'groceries'),
-    tests.to_id('wallets', 'home'),
-    '2026-11-21',
-    'Groceries',
-    tests.to_id('categories', 'food'),
-    12000,
-    tests.get_supabase_uid('partner')
-);
----------------------------------------------------
-
-select plan(3);
-
--- Blocked deletes raise no error, they just affect 0 rows,
--- so each one is checked afterwards as service_role (which bypasses RLS).
-
--- Outsider tries to delete a Home transaction
-select tests.authenticate_as('outsider');
-
-delete from public.transactions
-where id = tests.to_id('transactions', 'dinner');
-
-select tests.authenticate_as_service_role();
-select isnt_empty(
-    $$ select 1 from public.transactions where id = tests.to_id('transactions', 'dinner') $$,
-    'An outsider cannot delete a transaction of a wallet they don''t belong to'
 );
 
--- Partner deletes a transaction the owner added
 select tests.authenticate_as('partner');
-
 delete from public.transactions
 where id = tests.to_id('transactions', 'dinner');
 
@@ -72,9 +86,29 @@ select is_empty(
     'The partner can delete a transaction the owner added'
 );
 
--- Owner deletes a transaction the partner added
-select tests.authenticate_as('owner');
+----------------- Test 3: Owner deletes the partner's transaction -----------------
+select tests.authenticate_as_service_role();
+insert into public.transactions
+(
+    id,
+    wallet_id,
+    occurred_on,
+    description,
+    category_id,
+    amount_minor,
+    created_by
+) values
+(
+    tests.to_id('transactions', 'groceries'),
+    tests.to_id('wallets', 'home'),
+    '2026-11-21',
+    'Groceries',
+    tests.to_id('categories', 'food'),
+    12000,
+    tests.get_supabase_uid('partner')
+);
 
+select tests.authenticate_as('owner');
 delete from public.transactions
 where id = tests.to_id('transactions', 'groceries');
 

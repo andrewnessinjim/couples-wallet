@@ -51,10 +51,15 @@ insert into public.transactions
     9900000,
     tests.get_supabase_uid('outsider')
 );
+
+-- All tests here only read, so they share the rows above: each one checks
+-- which of the same three transactions a user can see.
 ---------------------------------------------------
 
 select plan(5);
 
+----------------- Test 1: Guard -----------------
+select tests.authenticate_as_service_role();
 select is(
     (select count(*) from public.transactions
      where wallet_id in (tests.to_id('wallets', 'home'), tests.to_id('wallets', 'other'))),
@@ -62,6 +67,7 @@ select is(
     'Guard: the test wallets have 3 transactions'
 );
 
+----------------- Test 2: Owner sees the whole wallet -----------------
 select tests.authenticate_as('owner');
 select bag_eq(
     $$
@@ -72,6 +78,7 @@ select bag_eq(
     'The owner sees every transaction in their wallet, including the partner''s'
 );
 
+----------------- Test 3: Partner sees the whole wallet -----------------
 select tests.authenticate_as('partner');
 select bag_eq(
     $$
@@ -82,6 +89,7 @@ select bag_eq(
     'The partner sees every transaction in their wallet, including the owner''s'
 );
 
+----------------- Test 4: Outsider sees only their own wallet -----------------
 select tests.authenticate_as('outsider');
 select bag_eq(
     $$
@@ -92,6 +100,7 @@ select bag_eq(
     'An outsider sees only their own wallet''s transactions'
 );
 
+----------------- Test 5: Logged-out users see nothing -----------------
 select tests.clear_authentication();
 select is_empty(
     $$ select 1 from public.transactions $$,

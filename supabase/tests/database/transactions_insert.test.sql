@@ -17,6 +17,7 @@ select tests.insert_category('other', 'space_travel', 'Space Travel', 'expense')
 
 select plan(6);
 
+----------------- Test 1: Owner adds a transaction -----------------
 select tests.authenticate_as('owner');
 select lives_ok(
     $$
@@ -36,9 +37,11 @@ select lives_ok(
             50000
         )
     $$,
-    'Owner can save a transaction in his wallet'
+    'Owner can save a transaction in their wallet'
 );
 
+----------------- Test 2: created_by cannot be spoofed -----------------
+select tests.authenticate_as('owner');
 select throws_ok(
     $$
         insert into public.transactions
@@ -64,6 +67,8 @@ select throws_ok(
     'Owner cannot save a transaction under their partner''s name'
 );
 
+
+----------------- Test 3: Partner adds a transaction -----------------
 select tests.authenticate_as('partner');
 select lives_ok(
     $$
@@ -83,9 +88,11 @@ select lives_ok(
             50000
         )
     $$,
-    'Partner can save a transaction in his wallet'
+    'Partner can save a transaction in their wallet'
 );
 
+----------------- Test 4: Category must belong to the wallet -----------------
+select tests.authenticate_as('partner');
 select throws_ok(
     $$
         insert into public.transactions
@@ -109,6 +116,8 @@ select throws_ok(
     'Cannot use a category belonging to another wallet'
 );
 
+
+----------------- Test 5: Outsider cannot add a transaction -----------------
 select tests.authenticate_as('outsider');
 select throws_ok(
     $$ 
@@ -133,6 +142,8 @@ select throws_ok(
     'Non wallet-members cannot save transactions in that wallet'
 );
 
+----------------- Test 6: created_at cannot be spoofed -----------------
+select tests.authenticate_as('outsider');
 select throws_ok(
     $$ 
         insert into public.transactions
