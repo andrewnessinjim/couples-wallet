@@ -1,6 +1,26 @@
 -- Project-specific test helpers. Runs right after the basejump helpers (00000).
 -- Like those, these are created outside a transaction, so they stay in the local
 -- database until the next `supabase db reset`. Never copy this into a migration.
+--
+-- API
+--   tests.to_id(table, label) -> uuid
+--       Fixed id for a label. Safe anywhere, even after authenticate_as.
+--   tests.insert_wallet(label, owner) -> uuid
+--       Wallet named initcap(label), owned by the basejump user `owner`.
+--   tests.add_partner(wallet, partner) -> void
+--       Sets the wallet's partner to the basejump user `partner`.
+--   tests.insert_category(wallet, label, name, type) -> uuid
+--       Category `name` ('income' | 'expense') in the wallet, id to_id('categories', label).
+--
+--   The insert_*/add_* helpers run under the caller's RLS: call them in setup,
+--   before tests.authenticate_as(...).
+--
+-- Example setup
+--   select tests.create_supabase_user('owner');
+--   select tests.create_supabase_user('partner');
+--   select tests.insert_wallet('home', 'owner');
+--   select tests.add_partner('home', 'partner');
+--   select tests.insert_category('home', 'food', 'Food', 'expense');
 
 -- Turns a table name and a readable label into a fixed uuid:
 -- tests.to_id('wallets', 'home') returns the same uuid in every file and every run.
@@ -15,13 +35,9 @@ as $$
     select md5(p_table || ':' || p_label)::uuid;
 $$;
 
--- The basejump file revokes execute on new functions in the tests schema by default.
--- Tests call this while acting as a user, so those roles need it.
-grant execute on function tests.to_id(text, text) to anon, authenticated, service_role;
-
 -- Factory helpers: each one creates a single row, with its id from tests.to_id.
 -- They insert straight into the tables, so call them during setup, before
--- tests.authenticate_as(...). No grant: only postgres, their owner, runs them.
+-- tests.authenticate_as(...): after it, RLS applies to their inserts too.
 
 -- tests.insert_wallet('home', 'owner') creates the wallet "Home" owned by the
 -- basejump user 'owner'.

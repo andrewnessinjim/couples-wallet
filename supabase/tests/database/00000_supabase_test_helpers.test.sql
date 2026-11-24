@@ -3,6 +3,29 @@
 ----- MIT License: https://github.com/usebasejump/supabase-test-helpers/blob/main/LICENSE.md
 -------------------------------------------------------------------------------------
 
+-- API (summary added by this project; the full docs are above each function below)
+--
+-- Users
+--   tests.create_supabase_user(identifier, email?, phone?, metadata?) -> uuid
+--   tests.get_supabase_uid(identifier) -> uuid
+--   tests.get_supabase_user(identifier) -> json
+--
+-- Acting as someone
+--   tests.authenticate_as(identifier) -> void
+--   tests.authenticate_as_service_role() -> void
+--   tests.clear_authentication() -> void
+--
+-- Assertions (each counts as one test in plan)
+--   tests.rls_enabled(schema) -> text
+--   tests.rls_enabled(schema, table) -> text
+--
+-- Time
+--   tests.freeze_time(timestamptz) -> void
+--   tests.unfreeze_time() -> void
+--
+-- Functions later created in the tests schema (by the same role) are executable by
+-- anon, authenticated and service_role by default, but not by public.
+
 -- We want to store all of this in the tests schema to keep it
 -- separate from any application data
 CREATE SCHEMA IF NOT EXISTS tests;
