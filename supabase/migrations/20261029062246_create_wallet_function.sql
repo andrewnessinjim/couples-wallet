@@ -19,6 +19,25 @@ begin
         raise exception 'Profile not found for the user: %', auth.uid();
     end if;
 
+    insert into public.categories(wallet_id, name, type)
+    values 
+        (v_wallet_id, 'Groceries', 'expense'),
+        (v_wallet_id, 'Dining Out', 'expense'),
+        (v_wallet_id, 'Housing', 'expense'),
+        (v_wallet_id, 'Utilities', 'expense'),
+        (v_wallet_id, 'Transport', 'expense'),
+        (v_wallet_id, 'Health', 'expense'),
+        (v_wallet_id, 'Shopping', 'expense'),
+        (v_wallet_id, 'Entertainment', 'expense'),
+        (v_wallet_id, 'Subscriptions', 'expense'),
+        (v_wallet_id, 'Travel', 'expense'),
+        (v_wallet_id, 'Other', 'expense'),
+        (v_wallet_id, 'Salary', 'income'),
+        (v_wallet_id, 'Side income', 'income'),
+        (v_wallet_id, 'Gifts', 'income'),
+        (v_wallet_id, 'Refunds', 'income'),
+        (v_wallet_id, 'Other', 'income');
+
     return v_wallet_id;
 end;
 $$;
