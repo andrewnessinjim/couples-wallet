@@ -36,7 +36,7 @@ I designed and wrote this project myself. I used [Claude](https://claude.ai) as 
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) 22 or later
+- [Node.js](https://nodejs.org) 22.18 or later (it runs the TypeScript seed script directly)
 - [pnpm](https://pnpm.io)
 - [Docker](https://www.docker.com), running. The local Supabase stack runs in containers.
 
@@ -64,7 +64,7 @@ The Supabase CLI is installed with the project's dependencies, so you don't need
    pnpm db:reset
    ```
 
-   This applies every migration in `supabase/migrations`, then creates two confirmed users, `andrea@coupleswallet.com` and `abel@coupleswallet.com`. Their password is in [scripts/seed-users.mjs](scripts/seed-users.mjs).
+   This applies every migration in `supabase/migrations`, then runs [scripts/seed-users.ts](scripts/seed-users.ts). It creates four confirmed users: `andrea@coupleswallet.com` and `abel@coupleswallet.com` share a wallet with transactions dated in the current month, and `batman@coupleswallet.com` and `catwoman@coupleswallet.com` have no wallet yet. Their password is in the script.
 
 4. **Start the app**
 

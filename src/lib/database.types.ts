@@ -23,7 +23,27 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "invitations": {
+            "categories": {
+                  Row: {
+                    "id": string,"name": string,"type": string,"wallet_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: string,"name": string,"type": string,"wallet_id": string
+                  }
+                  Update: {
+                    "id"?: string,"name"?: string,"type"?: string,"wallet_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "categories_wallet_id_fkey"
+      columns: ["wallet_id"]
+isOneToOne: false
+      referencedRelation: "wallets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"invitations": {
                   Row: {
                     "id": string,"partner_email": string,"partner_name": string,"wallet_id": string | null
                   }
@@ -56,6 +76,38 @@ isOneToOne: true
                   }
                   Relationships: [
                     
+                  ]
+                },"transactions": {
+                  Row: {
+                    "amount_minor": number,"category_id": string,"created_at": string,"created_by": string | null,"description": string,"id": string,"occurred_on": string,"wallet_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount_minor": number,"category_id": string,"created_at"?: string,"created_by"?: string | null,"description": string,"id"?: string,"occurred_on": string,"wallet_id": string
+                  }
+                  Update: {
+                    "amount_minor"?: number,"category_id"?: string,"created_at"?: string,"created_by"?: string | null,"description"?: string,"id"?: string,"occurred_on"?: string,"wallet_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "transactions_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "transactions_wallet_id_category_id_fkey"
+      columns: ["wallet_id","category_id"]
+isOneToOne: false
+      referencedRelation: "categories"
+      referencedColumns: ["wallet_id","id"]
+    },{
+      foreignKeyName: "transactions_wallet_id_fkey"
+      columns: ["wallet_id"]
+isOneToOne: false
+      referencedRelation: "wallets"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"wallets": {
                   Row: {
@@ -99,6 +151,9 @@ isOneToOne: false
 { Args: { "p_code": string }; Returns: {
               "owner_name": string,"partner_email": string,"partner_has_account": boolean,"partner_name": string,"wallet_name": string
             }[]
+                           },
+"is_wallet_member":
+{ Args: { "p_wallet_id": string }; Returns: boolean
                            },
 "is_wallet_owner":
 { Args: { "p_wallet_id": string }; Returns: boolean
